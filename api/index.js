@@ -141,7 +141,7 @@ const ENTITY_TABLE_MAP = {
 // Re-mapping for paper-student assignments specifically if needed
 // Actually, 'assignments' in papers.json are stored in a separate table in Supabase.
 // Let's use simple table names in current logic mapping:
-const ALLOWED_ENTITIES = ['students', 'papers', 'results', 'config', 'feedback', 'materials', 'materialAssignments'];
+const ALLOWED_ENTITIES = ['students', 'papers', 'results', 'config', 'feedback', 'materials', 'materialAssignments', 'assignments'];
 
 app.get('/api/data/:entity', async (req, res) => {
     try {
@@ -149,7 +149,7 @@ app.get('/api/data/:entity', async (req, res) => {
         if (!ALLOWED_ENTITIES.includes(entity)) return res.status(400).json({ error: 'Invalid entity' });
 
         const table = entity === 'config' ? 'site_config' : 
-                     entity === 'materialAssignments' ? 'material_assignments' : entity;
+                     (entity === 'materialAssignments' || entity === 'assignments') ? 'material_assignments' : entity;
 
         const { data, error } = await supabase.from(table).select('*');
         if (error) throw error;
@@ -173,7 +173,7 @@ app.post('/api/data/:entity', authMiddleware, async (req, res) => {
         }
 
         const table = entity === 'config' ? 'site_config' : 
-                     entity === 'materialAssignments' ? 'material_assignments' : entity;
+                     (entity === 'materialAssignments' || entity === 'assignments') ? 'material_assignments' : entity;
 
         // Upsert the entire array or single object
         const items = Array.isArray(req.body) ? req.body : [req.body];
