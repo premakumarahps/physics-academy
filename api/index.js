@@ -10,7 +10,10 @@ const app = express();
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const SESSION_TIMEOUT = '1h'; 
-const JWT_SECRET = process.env.JWT_SECRET || 'al-physics-academy-secret-2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET environment variable is not set!');
+}
 
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
@@ -148,14 +151,27 @@ app.get('/api/data/:entity', async (req, res) => {
         const entity = req.params.entity;
         if (!ALLOWED_ENTITIES.includes(entity)) return res.status(400).json({ error: 'Invalid entity' });
 
+        // Protect sensitive entities
+        const sensitiveEntities = ['students', 'results', 'feedback', 'materialAssignments', 'assignments'];
+        if (sensitiveEntities.includes(entity)) {
+            // Need a way to run authMiddleware inline or just call its logic
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(401).json({ error: 'Unauthorized: Authentication required for this data' });
+            }
+            try {
+                jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+            } catch (err) {
+                return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
+            }
+        }
+
         const table = entity === 'config' ? 'site_config' : 
                      (entity === 'materialAssignments' || entity === 'assignments') ? 'material_assignments' : entity;
 
         const { data, error } = await supabase.from(table).select('*');
         if (error) throw error;
 
-        // Map back from snake_case to camelCase for the frontend if needed
-        // Or return as is if frontend handles it (frontend uses getStudents() etc.)
         if (entity === 'config') return res.json(data[0] || {});
         res.json(data || []);
     } catch (e) {
