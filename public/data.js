@@ -49,6 +49,36 @@ const DB = {
         return headers;
     },
 
+    // New: Client-side Image Compression (Bypasses Vercel 4.5MB limit)
+    _compressImage(file, maxW = 1600, quality = 0.8) {
+        return new Promise((resolve) => {
+            if (!file.type.startsWith('image/')) return resolve(file);
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxW) {
+                        h = Math.round((h * maxW) / w);
+                        w = maxW;
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    canvas.toBlob((blob) => {
+                        const optimizedFile = new File([blob], file.name, { type: 'image/jpeg' });
+                        resolve(optimizedFile);
+                    }, 'image/jpeg', quality);
+                };
+            };
+        });
+    },
+
     // ═══════════════════════════════════════
     // DEFAULT DROPDOWN OPTIONS
     // ═══════════════════════════════════════
@@ -326,7 +356,11 @@ const DB = {
         formData.append('questionData', JSON.stringify(q));
 
         if (imageFiles && imageFiles.length > 0) {
-            imageFiles.forEach(file => {
+            // Compress all images in parallel before uploading
+            const optimizedFiles = await Promise.all(
+                imageFiles.map(file => this._compressImage(file))
+            );
+            optimizedFiles.forEach(file => {
                 formData.append('images', file);
             });
         }

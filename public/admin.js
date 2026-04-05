@@ -643,7 +643,7 @@ async function addQuestionFromUpload() {
     
     try {
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Saving...';
+        btn.innerHTML = '<span class="spinner"></span> Optimizing & Saving...';
 
         const questionData = {
             type,
