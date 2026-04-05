@@ -240,7 +240,15 @@
     const links = (config.navLinks || []).map(l => `<a href="${l.href}">${l.label}</a>`).join('');
     navLinks.innerHTML = links;
 
-    const mobileLinks = (config.navLinks || []).map(l => `<a href="${l.href}">${l.label}</a>`).join('');
+    const mobileLinks = (config.navLinks || [
+      { label: 'Home', href: '#hero' },
+      { label: 'About', href: '#about' },
+      { label: 'Services', href: '#services' },
+      { label: 'Gallery', href: '#gallery' },
+      { label: 'Testimonials', href: '#testimonials' },
+      { label: 'Contact', href: '#contact' }
+    ]).map(l => `<a href="${l.href}">${l.label}</a>`).join('');
+    
     mobileMenu.innerHTML = mobileLinks + `<a href="${config.lmsButtonUrl || '/login.html'}" class="nav-cta" style="margin-top:16px">${ICONS.clipboard} ${config.lmsButtonText || 'Student Portal'}</a>`;
 
     // Update logo text
@@ -255,11 +263,17 @@
       }
     }
 
-    // Update CTA
+    // Update CTA (Desktop)
     const navCta = document.getElementById('nav-cta');
     if (navCta) {
       navCta.href = config.lmsButtonUrl || '/login.html';
       navCta.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> ${config.lmsButtonText || 'Student Portal'}`;
+    }
+
+    // Update CTA (Mobile)
+    const navCtaMobile = document.getElementById('nav-cta-mobile');
+    if (navCtaMobile) {
+      navCtaMobile.href = config.lmsButtonUrl || '/login.html';
     }
 
     // Update page title

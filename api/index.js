@@ -227,7 +227,7 @@ app.get('/api/site-content/config', async (req, res) => {
             socials: data.socials,
             navLinks: data.nav_links,
             lmsButtonText: data.lms_button_text,
-            lms_buttonUrl: data.lms_button_url,
+            lmsButtonUrl: data.lms_button_url,
             footerText: data.footer_text
         };
         res.json(config);
