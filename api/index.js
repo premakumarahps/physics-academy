@@ -213,6 +213,60 @@ app.post('/api/dropdowns', authMiddleware, adminOnly, async (req, res) => {
     }
 });
 
+// --- Site Content Endpoints (Landing Page) ---
+app.get('/api/site-content/config', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('landing_config').select('*').single();
+        if (error) throw error;
+        
+        // Map back to camelCase for the frontend if needed
+        const config = {
+            siteName: data.site_name,
+            tagline: data.tagline,
+            phone: data.phone,
+            socials: data.socials,
+            navLinks: data.nav_links,
+            lmsButtonText: data.lms_button_text,
+            lms_buttonUrl: data.lms_button_url,
+            footerText: data.footer_text
+        };
+        res.json(config);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.get('/api/site-content/sections', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('landing_sections').select('*').order('order_index', { ascending: true });
+        if (error) throw error;
+
+        // Map back to format expected by home.js
+        const sections = data.map(s => ({
+            id: s.id,
+            type: s.type,
+            heading: s.heading,
+            subheading: s.subheading,
+            content: s.content,
+            image: s.image,
+            ctaText: s.cta_text,
+            ctaUrl: s.cta_url,
+            secondaryCtaText: s.secondary_cta_text,
+            secondaryCtaUrl: s.secondary_cta_url,
+            stats: s.stats,
+            items: s.items,
+            images: s.images,
+            whatsapp: s.whatsapp,
+            email: s.email,
+            phone: s.phone,
+            address: s.address
+        }));
+        res.json(sections);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Authentication
 app.post('/api/auth/login', async (req, res) => {
     try {
