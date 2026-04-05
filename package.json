@@ -2,12 +2,10 @@
   "name": "student_lms",
   "version": "1.0.0",
   "description": "",
-  "main": "admin.js",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node server/index.js",
-    "frontend": "npx serve ./",
-    "dev": "echo 'Run \"npm start\" and \"npm run frontend\" in two separate terminals'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node api/index.js",
+    "dev": "vercel dev"
   },
   "keywords": [],
   "author": "",

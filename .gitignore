@@ -16,7 +16,5 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Local Backups (Your PC only)
-server/uploads/
-scripts/migrate-to-cloud.js
-supabase_schema.sql
+# Local Data Pulls (Do not commit dynamic Supabase DB content to Git)
+cloud-config-sync/content/
