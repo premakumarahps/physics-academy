@@ -881,7 +881,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; lin
 
 /* ─── Mobile Menu Overlay ─── */
 .mobile-menu {
-  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 999;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1001;
   background: rgba(250,251,253,0.96);
   backdrop-filter: blur(20px);
   display: flex; flex-direction: column;
