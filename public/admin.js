@@ -632,52 +632,62 @@ async function addQuestionFromUpload() {
     const year = document.getElementById('qm-add-year') ? document.getElementById('qm-add-year').value : '';
     const qnum = document.getElementById('qm-add-qnum') ? document.getElementById('qm-add-qnum').value : '';
 
-    if (!type) {
-        showToast('Please select a question type', 'error');
-        return;
-    }
+    // Robust Validation
+    if (!type) return showToast('Please select a Question Type', 'error');
+    if (!source) return showToast('Please select a Source', 'error');
+    if (!examType) return showToast('Please select an Exam Type', 'error');
+    if (!unit) return showToast('Please select a Unit', 'error');
 
-    const questionData = {
-        type,
-        source,
-        examType,
-        location: { year, questionNumber: qnum },
-        unit,
-        subUnit,
-        question: uploadedQuestionData.question,
-        options: uploadedQuestionData.options,
-        correctAnswer: uploadedQuestionData.correctAnswer,
-        options_layout: uploadedQuestionData.options_layout || 'horizontal',
-        images: (uploadedQuestionData.images || []).map(img => ({
-            name: img.name,
-            data: img.data || '',
-            position: img.position || 'bottom-center',
-            width: img.width || 'auto',
-            marginTop: img.marginTop || '0px',
-            marginRight: img.marginRight || '0px',
-            marginLeft: img.marginLeft || '0px'
-        }))
-    };
-
+    const btn = document.getElementById('qm-add-btn');
+    const originalHTML = btn.innerHTML;
+    
     try {
-        // Pass the raw File objects directly to the updated data layer 
-        // which sends them via FormData to the local Node.js server
-        // This completely bypasses localStorage limits!
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+        const questionData = {
+            type,
+            source,
+            examType,
+            location: { year, questionNumber: qnum },
+            unit,
+            subUnit,
+            question: uploadedQuestionData.question,
+            options: uploadedQuestionData.options,
+            correctAnswer: uploadedQuestionData.correctAnswer,
+            options_layout: uploadedQuestionData.options_layout || 'horizontal',
+            images: (uploadedQuestionData.images || []).map(img => ({
+                name: img.name,
+                data: img.data || '',
+                position: img.position || 'bottom-center',
+                width: img.width || 'auto',
+                marginTop: img.marginTop || '0px',
+                marginRight: img.marginRight || '0px',
+                marginLeft: img.marginLeft || '0px'
+            }))
+        };
+
         const saved = await DB.addQuestion(questionData, uploadedImageFiles);
-        showToast(`Question added successfully (ID: ${saved.id})`, 'success');
+        showToast(`Question saved successfully!`, 'success');
 
         // Reset form
         uploadedQuestionData = null;
         uploadedImageFiles = [];
-        document.getElementById('qm-folder-input').value = '';
-        document.getElementById('qm-add-btn').disabled = true;
+        const folderInput = document.getElementById('qm-folder-input');
+        if (folderInput) folderInput.value = '';
+        
+        btn.disabled = true;
+        btn.innerHTML = originalHTML;
+        
         document.getElementById('qm-preview').style.display = 'none';
         document.getElementById('folder-files-info').style.display = 'none';
 
         initDashboard(); // Refresh all stats and lists
     } catch (e) {
-        showToast('Failed to save question: ' + e.message, 'error');
+        showToast('Failed to save: ' + e.message, 'error');
         console.error(e);
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
     }
 }
 

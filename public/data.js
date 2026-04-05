@@ -96,10 +96,16 @@ const DB = {
             }
 
             // Load Questions (with auth headers)
-            const qRes = await fetch(`${API_BASE}/questions${cacheBust}`, {
-                headers: this._getAuthHeaders()
-            });
-            this._state.questions = await qRes.json();
+            try {
+                const qRes = await fetch(`${API_BASE}/questions${cacheBust}`, {
+                    headers: this._getAuthHeaders()
+                });
+                const qData = await qRes.json();
+                this._state.questions = Array.isArray(qData) ? qData : [];
+            } catch (e) {
+                console.error("Failed to load questions:", e);
+                this._state.questions = [];
+            }
 
             // Fetch remaining entities from server instead of localStorage
             const entities = ['students', 'papers', 'assignments', 'results', 'config', 'feedback', 'materials', 'materialAssignments'];
