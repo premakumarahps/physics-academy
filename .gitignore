@@ -1,0 +1,22 @@
+# Secrets and Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vercel
+.vercel
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Local Backups (Your PC only)
+server/uploads/
+scripts/migrate-to-cloud.js
+supabase_schema.sql

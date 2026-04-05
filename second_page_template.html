@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Question Page Template</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Noto+Sans+Sinhala:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: #d0d0d0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 10px;
+    font-family: 'Noto Sans', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+}
+
+/* --- A4 Page --- */
+.a4-page {
+    width: 210mm;
+    height: 297mm;
+    background: #fff;
+    margin-top: 60px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
+/* --- Paper Reference (top-left) --- */
+.paper-ref {
+    position: absolute;
+    top: 9.5mm;
+    left: 10mm;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* --- Page Number (top-center) --- */
+.page-number {
+    position: absolute;
+    top: 9.5mm;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* --- Outer Border --- */
+.page-border {
+    position: absolute;
+    top: 14mm;
+    left: 10mm;
+    right: 10mm;
+    bottom: 10mm;
+    border: 1.5px solid #000;
+}
+
+/* --- Print --- */
+@media print {
+    body { background: #fff; padding: 0; margin: 0; }
+    .a4-page {
+        width: 210mm;
+        height: 297mm;
+        margin: 0;
+        box-shadow: none;
+        page-break-after: always;
+    }
+    @page { size: A4 portrait; margin: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="a4-page" id="qPage">
+    <div class="page-border" id="qBorder"></div>
+</div>
+
+</body>
+</html>

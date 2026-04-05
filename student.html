@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard — Student LMS</title>
+    <link rel="stylesheet" href="shared.css" />
+    <link rel="stylesheet" href="student.css" />
+</head>
+
+<body>
+    <!-- HEADER -->
+    <header class="student-header">
+        <div class="header-inner">
+            <div class="header-brand">
+                <div class="header-logo"><img src="logo.svg" alt="Logo" /></div>
+                <div>
+                    <div class="header-title">Student LMS</div>
+                    <div class="header-sub">Student Dashboard</div>
+                </div>
+            </div>
+            <div class="header-user">
+                <span class="student-type-badge" id="type-badge"></span>
+                <span class="user-name" id="user-name"></span>
+                <button class="btn-logout-sm" onclick="Auth.logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="student-main">
+        <div class="welcome-banner">
+            <h1 id="welcome-text">Welcome back!</h1>
+            <p>Your assigned activities and results are below.</p>
+        </div>
+
+        <!-- Progress Summary -->
+        <div class="progress-summary" id="progress-summary" style="display:none;"></div>
+
+        <!-- Study Materials -->
+        <div id="materials-section" style="display:none;">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" />
+                    <polyline points="13 2 13 9 20 9" />
+                </svg>
+                Study Materials
+            </h2>
+            <div class="materials-grid" id="student-materials"></div>
+        </div>
+
+        <!-- Your Activities (premium only) -->
+        <div id="your-papers-section" style="display:none;">
+            <h2 class="section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+                ⭐ Your Activities
+            </h2>
+            <div class="papers-grid" id="your-papers"></div>
+        </div>
+
+        <!-- General Activities (shows for all, labeled differently for premium) -->
+        <h2 class="section-title" id="pending-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Pending Activities
+        </h2>
+        <div class="papers-grid" id="pending-papers"></div>
+
+        <!-- Completed Activities -->
+        <h2 class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Completed
+        </h2>
+        <div class="papers-grid" id="completed-papers"></div>
+
+        <!-- Results History -->
+        <h2 class="section-title mt-16">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            Results History
+        </h2>
+        <div class="card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Activity</th>
+                        <th>Type</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Feedback</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="results-tbody"></tbody>
+            </table>
+            <div class="empty-state" id="results-empty" style="display:none;">
+                <p>No results yet. Complete an activity to see your scores here.</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="shared.js?v=2"></script>
+    <script src="data.js?v=2"></script>
+    <script src="auth.js?v=2"></script>
+    <script src="student.js?v=2"></script>
+</body>
+
+</html>

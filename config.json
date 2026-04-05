@@ -1,0 +1,17 @@
+{
+  "paperTitle": "Examination",
+  "paperSubject": "MCQ Paper",
+  "paperCode": "AL/2018/01/S-I",
+  "timerMinutes": 120,
+  "markingScheme": "+1 per correct",
+  "negativeMarking": false,
+  "instructions": [
+    "This paper contains multiple choice questions (MCQs).",
+    "Each question has <strong>five</strong> answer choices numbered (1) to (5).",
+    "Select <strong>only one</strong> answer for each question.",
+    "There is <strong>no negative marking</strong> for wrong answers.",
+    "A timer will start once you begin. The paper will auto-submit when time runs out.",
+    "After submission, you can review corrections and download the marked paper as a PDF."
+  ],
+  "welcomeHint": "Click start when you are ready. Good luck!"
+}
