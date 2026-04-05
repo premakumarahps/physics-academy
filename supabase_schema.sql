@@ -1,5 +1,14 @@
 -- AL Physics Academy Database Schema
 
+-- 0. Admins Table (Isolated from students)
+CREATE TABLE IF NOT EXISTS admins (
+    id TEXT PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    raw_password TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 1. Students Table
 CREATE TABLE IF NOT EXISTS students (
     id TEXT PRIMARY KEY,
@@ -159,6 +168,7 @@ CREATE INDEX IF NOT EXISTS idx_material_assignments_student_id ON material_assig
 
 -- --- SECURITY (RLS) ---
 -- Enable RLS on all tables
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE papers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE questions ENABLE ROW LEVEL SECURITY;

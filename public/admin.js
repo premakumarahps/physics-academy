@@ -1951,52 +1951,68 @@ function toggleSidebar() {
     overlay.classList.toggle('open');
 }
 
-// ═══════════════════════════════════════
-// ADMIN PASSWORD CHANGE (Settings)
-// ═══════════════════════════════════════
-async function changeAdminPassword() {
+// ADMIN SETTINGS (Update credentials)
+async function updateAdminSettings() {
     const current = document.getElementById('settings-current-pw').value;
+    const newUsername = document.getElementById('settings-new-username').value.trim();
     const newPw = document.getElementById('settings-new-pw').value;
     const confirm = document.getElementById('settings-confirm-pw').value;
     const errEl = document.getElementById('settings-pw-error');
 
     errEl.style.display = 'none';
 
-    if (!current || !newPw || !confirm) {
-        errEl.textContent = 'All fields are required';
+    if (!current) {
+        errEl.textContent = 'Current password is required to save changes';
         errEl.style.display = 'block';
         return;
     }
-    if (newPw.length < 4) {
+    
+    if (newPw && newPw.length < 4) {
         errEl.textContent = 'New password must be at least 4 characters';
         errEl.style.display = 'block';
         return;
     }
-    if (newPw !== confirm) {
+    if (newPw && newPw !== confirm) {
         errEl.textContent = 'New passwords do not match';
+        errEl.style.display = 'block';
+        return;
+    }
+    if (newUsername && newUsername.length < 3) {
+        errEl.textContent = 'New username must be at least 3 characters';
         errEl.style.display = 'block';
         return;
     }
 
     try {
         const session = Auth.getSession();
-        const resp = await fetch('/api/auth/change-password', {
+        const resp = await fetch('/api/auth/update-admin', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${session.token}`
             },
-            body: JSON.stringify({ currentPassword: current, newPassword: newPw })
+            body: JSON.stringify({ 
+                currentPassword: current, 
+                newUsername: newUsername || undefined, 
+                newPassword: newPw || undefined 
+            })
         });
         const data = await resp.json();
 
         if (data.success) {
-            showToast('Password changed successfully!', 'success');
+            showToast('Settings updated successfully!', 'success');
+            // Update session if username changed
+            if (newUsername) {
+                session.username = newUsername;
+                sessionStorage.setItem('active_session', JSON.stringify(session));
+            }
+            // Clear fields
             document.getElementById('settings-current-pw').value = '';
+            document.getElementById('settings-new-username').value = '';
             document.getElementById('settings-new-pw').value = '';
             document.getElementById('settings-confirm-pw').value = '';
         } else {
-            errEl.textContent = data.error || 'Failed to change password';
+            errEl.textContent = data.error || 'Failed to update settings';
             errEl.style.display = 'block';
         }
     } catch (e) {

@@ -333,10 +333,33 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        const { data: user, error } = await supabase.from('students').select('*').eq('username', username).single();
+        // 1. Check Admins table first
+        const { data: admin } = await supabase.from('admins').select('*').eq('username', username).maybeSingle();
+        if (admin && bcrypt.compareSync(password, admin.password)) {
+            const payload = {
+                role: 'admin',
+                username: admin.username,
+                studentId: admin.id,
+                name: 'Administrator',
+                studentType: 'admin'
+            };
+            const token = jwt.sign(payload, JWT_SECRET, { expiresIn: SESSION_TIMEOUT });
+            return res.json({
+                success: true,
+                role: 'admin',
+                username: admin.username,
+                studentId: admin.id,
+                name: 'Administrator',
+                studentType: 'admin',
+                token
+            });
+        }
+
+        // 2. Check Students table fallback
+        const { data: user } = await supabase.from('students').select('*').eq('username', username).maybeSingle();
         if (user && bcrypt.compareSync(password, user.password)) {
             const payload = {
-                role: user.type === 'admin' ? 'admin' : 'student',
+                role: 'student',
                 username: user.username,
                 studentId: user.id,
                 name: user.name,
@@ -345,7 +368,7 @@ app.post('/api/auth/login', async (req, res) => {
             const token = jwt.sign(payload, JWT_SECRET, { expiresIn: SESSION_TIMEOUT });
             return res.json({
                 success: true,
-                role: payload.role,
+                role: 'student',
                 username: user.username,
                 studentId: user.id,
                 name: user.name,
@@ -426,35 +449,49 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// Change Admin Password
-app.post('/api/auth/change-password', authMiddleware, async (req, res) => {
+// Update Admin Credentials
+app.post('/api/auth/update-admin', authMiddleware, async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ success: false, error: 'Admin access required' });
         }
-        const { currentPassword, newPassword } = req.body;
-        if (!currentPassword || !newPassword) {
-            return res.status(400).json({ success: false, error: 'Current and new passwords are required' });
+        const { currentPassword, newUsername, newPassword } = req.body;
+        if (!currentPassword) {
+            return res.status(400).json({ success: false, error: 'Current password is required to make changes' });
         }
-        if (newPassword.length < 4) {
+        if (!newUsername && !newPassword) {
+            return res.status(400).json({ success: false, error: 'Nothing to update' });
+        }
+        if (newPassword && newPassword.length < 4) {
             return res.status(400).json({ success: false, error: 'New password must be at least 4 characters' });
         }
+        if (newUsername && newUsername.length < 3) {
+            return res.status(400).json({ success: false, error: 'New username must be at least 3 characters' });
+        }
 
-        // Find admin user
-        const { data: admin, error: fetchErr } = await supabase
-            .from('students').select('*').eq('type', 'admin').maybeSingle();
+        // Find admin user in admins table
+        const { data: admin, error: fetchErr } = await supabase.from('admins').select('*').eq('id', req.user.studentId).maybeSingle();
         if (fetchErr || !admin) {
-            return res.status(404).json({ success: false, error: 'Admin account not found' });
+            return res.status(404).json({ success: false, error: 'Admin account not found in admins table' });
         }
         if (!bcrypt.compareSync(currentPassword, admin.password)) {
             return res.status(401).json({ success: false, error: 'Current password is incorrect' });
         }
 
-        const hashedNew = bcrypt.hashSync(newPassword, 10);
-        const { error } = await supabase.from('students').update({ password: hashedNew }).eq('id', admin.id);
-        if (error) throw error;
+        const updates = {};
+        if (newUsername) updates.username = newUsername;
+        if (newPassword) {
+            updates.password = bcrypt.hashSync(newPassword, 10);
+            updates.raw_password = newPassword;
+        }
 
-        res.json({ success: true, message: 'Password changed successfully' });
+        const { error } = await supabase.from('admins').update(updates).eq('id', admin.id);
+        if (error) {
+            if (error.code === '23505') return res.status(409).json({ success: false, error: 'Username already taken' });
+            throw error;
+        }
+
+        res.json({ success: true, message: 'Settings updated successfully' });
     } catch (e) {
         res.status(500).json({ success: false, error: e.message });
     }
