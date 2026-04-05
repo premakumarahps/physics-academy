@@ -42,7 +42,7 @@ const Auth = {
             console.error('Logout request failed', e);
         }
         sessionStorage.removeItem(this.SESSION_KEY);
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     },
 
     getSession() {
@@ -66,12 +66,12 @@ const Auth = {
 
     // Redirect if not authenticated
     requireAdmin() {
-        if (!this.isAdmin()) { window.location.href = 'index.html'; return false; }
+        if (!this.isAdmin()) { window.location.href = 'login.html'; return false; }
         return true;
     },
 
     requireStudent() {
-        if (!this.isStudent()) { window.location.href = 'index.html'; return false; }
+        if (!this.isStudent()) { window.location.href = 'login.html'; return false; }
         return true;
     }
 };

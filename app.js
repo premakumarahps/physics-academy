@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const session = Auth.getSession();
 
   if (!session) {
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
     return;
   }
 
