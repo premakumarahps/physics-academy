@@ -1,0 +1,64 @@
+[
+    {
+        "category": "questionType",
+        "options": [
+            "MCQ",
+            "Structured",
+            "Essay"
+        ],
+        "updated_at": "2026-04-05T06:18:03.176384+00:00"
+    },
+    {
+        "category": "source",
+        "options": [
+            "Official",
+            "Model",
+            "Practice"
+        ],
+        "updated_at": "2026-04-05T06:18:04.438489+00:00"
+    },
+    {
+        "category": "examType",
+        "options": [
+            "School",
+            "Provincial",
+            "National",
+            "International"
+        ],
+        "updated_at": "2026-04-05T06:18:04.694666+00:00"
+    },
+    {
+        "category": "unit",
+        "options": [
+            "Unit 1",
+            "Unit 2",
+            "Unit 3",
+            "Unit 4",
+            "Unit 5"
+        ],
+        "updated_at": "2026-04-05T06:18:04.916407+00:00"
+    },
+    {
+        "category": "subUnit",
+        "options": {
+            "Unit 1": [
+                "Topic 1.1",
+                "Topic 1.2"
+            ],
+            "Unit 2": [
+                "Topic 2.1",
+                "Topic 2.2"
+            ],
+            "Unit 3": [
+                "Topic 3.1"
+            ],
+            "Unit 4": [
+                "Topic 4.1"
+            ],
+            "Unit 5": [
+                "Topic 5.1"
+            ]
+        },
+        "updated_at": "2026-04-05T06:18:05.150067+00:00"
+    }
+]

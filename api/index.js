@@ -47,6 +47,25 @@ function adminOnly(req, res, next) {
 const upload = multer({ storage: multer.memoryStorage() });
 
 // --- Helper Functions ---
+function mapKeys(obj, type) {
+    if (!obj || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(item => mapKeys(item, type));
+    
+    const result = {};
+    for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            let newKey = key;
+            if (type === 'toCamel') {
+                newKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+            } else if (type === 'toSnake') {
+                newKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+            }
+            result[newKey] = obj[key];
+        }
+    }
+    return result;
+}
+
 async function uploadToStorage(bucketName, fileName, buffer, contentType) {
     const { data, error } = await supabase.storage.from(bucketName).upload(fileName, buffer, {
         upsert: true,
@@ -64,7 +83,7 @@ app.get('/api/questions', authMiddleware, async (req, res) => {
     try {
         const { data, error } = await supabase.from('questions').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        res.json(data);
+        res.json(mapKeys(data, 'toCamel'));
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -133,7 +152,7 @@ app.delete('/api/questions/:id', authMiddleware, adminOnly, async (req, res) => 
 const ENTITY_TABLE_MAP = {
     'students': 'students',
     'papers': 'papers',
-    'assignments': 'material_assignments', // Wait, let's fix this in the frontend mapping
+    'assignments': 'assignments', // Fixed: mapping correctly
     'results': 'results',
     'config': 'site_config',
     'feedback': 'feedback',
@@ -141,9 +160,6 @@ const ENTITY_TABLE_MAP = {
     'materialAssignments': 'material_assignments'
 };
 
-// Re-mapping for paper-student assignments specifically if needed
-// Actually, 'assignments' in papers.json are stored in a separate table in Supabase.
-// Let's use simple table names in current logic mapping:
 const ALLOWED_ENTITIES = ['students', 'papers', 'results', 'config', 'feedback', 'materials', 'materialAssignments', 'assignments'];
 
 app.get('/api/data/:entity', async (req, res) => {
@@ -166,14 +182,14 @@ app.get('/api/data/:entity', async (req, res) => {
             }
         }
 
-        const table = entity === 'config' ? 'site_config' : 
-                     (entity === 'materialAssignments' || entity === 'assignments') ? 'material_assignments' : entity;
+        const table = ENTITY_TABLE_MAP[entity];
 
         const { data, error } = await supabase.from(table).select('*');
         if (error) throw error;
 
-        if (entity === 'config') return res.json(data[0] || {});
-        res.json(data || []);
+        const mappedData = mapKeys(data, 'toCamel');
+        if (entity === 'config') return res.json(mappedData[0] || {});
+        res.json(mappedData || []);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -188,8 +204,7 @@ app.post('/api/data/:entity', authMiddleware, async (req, res) => {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
-        const table = entity === 'config' ? 'site_config' : 
-                     (entity === 'materialAssignments' || entity === 'assignments') ? 'material_assignments' : entity;
+        const table = ENTITY_TABLE_MAP[entity];
 
         let items = Array.isArray(req.body) ? req.body : [req.body];
 
@@ -202,14 +217,15 @@ app.post('/api/data/:entity', authMiddleware, async (req, res) => {
                 return s;
             });
         }
+        
+        const mappedItems = mapKeys(items, 'toSnake');
 
         // Sync deletions: remove rows from DB that are no longer in the submitted array.
         // This ensures that client-side deletions (deleteStudent, deletePaper, etc.) persist
-        // in Supabase. Skip for 'assignments'/'materialAssignments' as they share a table,
-        // and skip for 'config' which is a single-row entity.
-        const skipDeleteSync = ['config', 'assignments', 'materialAssignments'];
+        // in Supabase.
+        const skipDeleteSync = ['config'];
         if (Array.isArray(req.body) && !skipDeleteSync.includes(entity)) {
-            const submittedIds = items.map(i => i.id).filter(Boolean);
+            const submittedIds = mappedItems.map(i => i.id).filter(Boolean);
             if (submittedIds.length > 0) {
                 // Fetch existing IDs and delete any that aren't in the submitted array
                 const { data: existing } = await supabase.from(table).select('id');
@@ -223,8 +239,8 @@ app.post('/api/data/:entity', authMiddleware, async (req, res) => {
             }
         }
 
-        if (items.length > 0) {
-            const { error } = await supabase.from(table).upsert(items);
+        if (mappedItems.length > 0) {
+            const { error } = await supabase.from(table).upsert(mappedItems);
             if (error) throw error;
         }
 
@@ -469,7 +485,7 @@ app.post('/api/materials/upload', authMiddleware, adminOnly, upload.single('file
         const { error } = await supabase.from('materials').upsert(material);
         if (error) throw error;
 
-        res.json({ success: true, material });
+        res.json({ success: true, material: mapKeys(material, 'toCamel') });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

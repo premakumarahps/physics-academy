@@ -1,0 +1,44 @@
+[
+    {
+        "id": 1,
+        "site_name": "AL Physics Academy",
+        "tagline": "Master A/L Physics with Expert Guidance",
+        "phone": "+94 77 123 4567",
+        "socials": {
+            "youtube": "https://youtube.com/@alphysicsacademy",
+            "facebook": "https://facebook.com/alphysicsacademy",
+            "whatsapp": "+94771234567",
+            "instagram": "https://instagram.com/alphysicsacademy"
+        },
+        "nav_links": [
+            {
+                "href": "#hero",
+                "label": "Home"
+            },
+            {
+                "href": "#about",
+                "label": "About"
+            },
+            {
+                "href": "#services",
+                "label": "Services"
+            },
+            {
+                "href": "#gallery",
+                "label": "Gallery"
+            },
+            {
+                "href": "#testimonials",
+                "label": "Testimonials"
+            },
+            {
+                "href": "#contact",
+                "label": "Contact"
+            }
+        ],
+        "lms_button_text": "Student Portal",
+        "lms_button_url": "/login.html",
+        "footer_text": "© 2026 AL Physics Academy. All rights reserved.",
+        "updated_at": "2026-04-05T06:54:09.329848+00:00"
+    }
+]

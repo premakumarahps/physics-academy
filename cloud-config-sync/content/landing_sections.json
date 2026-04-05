@@ -1,0 +1,222 @@
+[
+    {
+        "id": "hero",
+        "type": "hero",
+        "heading": "Master **A/L Physics**\nwith Confidence",
+        "subheading": "Individual & Group Classes · Paper Practice · Online Support · Proven Results",
+        "content": null,
+        "image": null,
+        "cta_text": "Start Your Journey",
+        "cta_url": "#contact",
+        "secondary_cta_text": "Explore Services",
+        "secondary_cta_url": "#services",
+        "stats": [],
+        "items": [],
+        "images": [],
+        "whatsapp": null,
+        "email": null,
+        "phone": null,
+        "address": null,
+        "order_index": 0,
+        "created_at": "2026-04-05T06:54:09.522601+00:00"
+    },
+    {
+        "id": "about",
+        "type": "about",
+        "heading": "About Me",
+        "subheading": null,
+        "content": "I am a dedicated **A/L Physics teacher** with over a decade of experience helping students master one of the most challenging subjects in the Advanced Level curriculum.\n\nMy teaching philosophy is built on three pillars:\n\n- **Deep Conceptual Understanding** — Not just memorizing formulas, but truly understanding the physics behind them\n- **Problem-Solving Mastery** — Systematic approaches to tackle any exam question with confidence\n- **Exam-Oriented Preparation** — Strategic preparation with past papers, model papers, and time management techniques\n\nI have guided **hundreds of students** to achieve outstanding results in their A/L examinations, with many going on to pursue engineering, medicine, and other prestigious fields.\n\nWhether you're just starting your A/L journey or need intensive revision before the exam, I bring the same **passion, patience, and expertise** to every session.",
+        "image": "https://aysqsstbpmcbtkushbkp.supabase.co/storage/v1/object/public/site-content/about.png",
+        "cta_text": null,
+        "cta_url": null,
+        "secondary_cta_text": null,
+        "secondary_cta_url": null,
+        "stats": [
+            {
+                "label": "Students Taught",
+                "value": "500+"
+            },
+            {
+                "label": "Pass Rate",
+                "value": "95%"
+            },
+            {
+                "label": "Years Experience",
+                "value": "10+"
+            },
+            {
+                "label": "A Passes",
+                "value": "50+"
+            }
+        ],
+        "items": [],
+        "images": [],
+        "whatsapp": null,
+        "email": null,
+        "phone": null,
+        "address": null,
+        "order_index": 1,
+        "created_at": "2026-04-05T06:54:09.751123+00:00"
+    },
+    {
+        "id": "services",
+        "type": "services",
+        "heading": "What I Offer",
+        "subheading": "Comprehensive support for every stage of your A/L Physics journey",
+        "content": null,
+        "image": null,
+        "cta_text": null,
+        "cta_url": null,
+        "secondary_cta_text": null,
+        "secondary_cta_url": null,
+        "stats": [],
+        "items": [
+            {
+                "icon": "book",
+                "title": "Theory Classes",
+                "description": "Comprehensive coverage of the **entire A/L Physics syllabus** including Mechanics, Waves, Electricity, Magnetism, and Modern Physics. Each topic is taught with clear explanations, real-world examples, and visual aids."
+            },
+            {
+                "icon": "edit",
+                "title": "Paper Classes",
+                "description": "Intensive **past paper and model paper** practice sessions. Learn time management, question analysis techniques, and marking-scheme strategies to maximize your score."
+            },
+            {
+                "icon": "users",
+                "title": "Group Sessions",
+                "description": "Small **group classes** (max 15 students) that combine the benefits of collaborative learning with personalized attention. Discussion-based approach helps cement understanding."
+            },
+            {
+                "icon": "user",
+                "title": "Individual Tutoring",
+                "description": "**One-on-one sessions** tailored to your specific needs. Ideal for students who need focused attention on particular topics or accelerated revision programs."
+            },
+            {
+                "icon": "monitor",
+                "title": "Online Classes",
+                "description": "**Live interactive online classes** with screen sharing, digital whiteboard, and recorded sessions. Study from anywhere without compromising on quality."
+            },
+            {
+                "icon": "clipboard",
+                "title": "Online Paper System",
+                "description": "Access our exclusive **online MCQ practice platform** with timed papers, instant grading, and detailed performance analytics. Practice anytime, anywhere."
+            }
+        ],
+        "images": [],
+        "whatsapp": null,
+        "email": null,
+        "phone": null,
+        "address": null,
+        "order_index": 2,
+        "created_at": "2026-04-05T06:54:09.943541+00:00"
+    },
+    {
+        "id": "gallery",
+        "type": "gallery",
+        "heading": "Gallery",
+        "subheading": "Moments from our classes, workshops, and student achievements",
+        "content": null,
+        "image": null,
+        "cta_text": null,
+        "cta_url": null,
+        "secondary_cta_text": null,
+        "secondary_cta_url": null,
+        "stats": [],
+        "items": [],
+        "images": [
+            {
+                "src": "https://aysqsstbpmcbtkushbkp.supabase.co/storage/v1/object/public/site-content/gallery_1.png",
+                "caption": "Interactive classroom session"
+            },
+            {
+                "src": "https://aysqsstbpmcbtkushbkp.supabase.co/storage/v1/object/public/site-content/gallery_2.png",
+                "caption": "Physics laboratory practical"
+            },
+            {
+                "src": "https://aysqsstbpmcbtkushbkp.supabase.co/storage/v1/object/public/site-content/gallery_3.png",
+                "caption": "Results day celebrations"
+            },
+            {
+                "src": "https://aysqsstbpmcbtkushbkp.supabase.co/storage/v1/object/public/site-content/gallery_4.png",
+                "caption": "Online learning platform"
+            },
+            {
+                "src": "https://aysqsstbpmcbtkushbkp.supabase.co/storage/v1/object/public/site-content/gallery_5.png",
+                "caption": "Group discussion session"
+            },
+            {
+                "src": "https://aysqsstbpmcbtkushbkp.supabase.co/storage/v1/object/public/site-content/gallery_6.png",
+                "caption": "Lab equipment demonstration"
+            }
+        ],
+        "whatsapp": null,
+        "email": null,
+        "phone": null,
+        "address": null,
+        "order_index": 3,
+        "created_at": "2026-04-05T06:54:10.147668+00:00"
+    },
+    {
+        "id": "testimonials",
+        "type": "testimonials",
+        "heading": "What Students Say",
+        "subheading": "Hear from students who have excelled with our guidance",
+        "content": null,
+        "image": null,
+        "cta_text": null,
+        "cta_url": null,
+        "secondary_cta_text": null,
+        "secondary_cta_url": null,
+        "stats": [],
+        "items": [
+            {
+                "quote": "Sir's teaching style made even the most complex topics in physics feel simple and intuitive. I went from struggling with mechanics to scoring an A in my A/L exam. Couldn't have done it without his guidance!",
+                "author": "Kasun Perera",
+                "detail": "2024 A/L — A Pass in Physics"
+            },
+            {
+                "quote": "The paper class sessions were a game-changer for me. Learning how to approach exam questions strategically and manage time effectively boosted my confidence tremendously.",
+                "author": "Nimasha Fernando",
+                "detail": "2023 A/L — Engineering Faculty, UoM"
+            },
+            {
+                "quote": "The online paper system is amazing! Being able to practice MCQs with instant feedback helped me identify my weak areas and improve consistently. Highly recommend for all A/L Physics students.",
+                "author": "Ravindu Silva",
+                "detail": "2024 A/L — B Pass in Physics"
+            },
+            {
+                "quote": "What sets Sir apart is his patience and genuine care for each student's progress. He doesn't just teach — he mentors. The individual sessions helped me overcome my fear of physics completely.",
+                "author": "Sakura Jayawardena",
+                "detail": "2023 A/L — Medical Faculty, UoC"
+            }
+        ],
+        "images": [],
+        "whatsapp": null,
+        "email": null,
+        "phone": null,
+        "address": null,
+        "order_index": 4,
+        "created_at": "2026-04-05T06:54:10.355442+00:00"
+    },
+    {
+        "id": "contact",
+        "type": "contact",
+        "heading": "Get in Touch",
+        "subheading": "Ready to start your A/L Physics journey? Reach out today!",
+        "content": "Whether you have questions about our classes, need guidance on choosing the right program, or want to schedule a **free consultation session**, I'm here to help.\n\nDon't wait until it's too late — start preparing **today** and give yourself the best chance at success!",
+        "image": null,
+        "cta_text": null,
+        "cta_url": null,
+        "secondary_cta_text": null,
+        "secondary_cta_url": null,
+        "stats": [],
+        "items": [],
+        "images": [],
+        "whatsapp": "+94771234567",
+        "email": "info@alphysicsacademy.lk",
+        "phone": "+94 77 123 4567",
+        "address": "No. 42, Galle Road, Colombo 03, Sri Lanka",
+        "order_index": 5,
+        "created_at": "2026-04-05T06:54:10.556425+00:00"
+    }
+]
