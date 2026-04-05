@@ -1199,7 +1199,7 @@ function renderPapersList() {
       <td class="text-sm text-dim">${dueText}</td>
       <td class="text-sm text-dim">${new Date(p.createdAt).toLocaleDateString()}</td>
       <td>
-        <div class="flex gap-4">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <button class="btn btn-sm btn-outline" onclick="editPaper('${p.id}')" title="Edit">Edit</button>
           <button class="btn btn-sm btn-outline" onclick="duplicatePaper('${p.id}')" title="Duplicate" style="color:var(--purple);border-color:var(--purple);">Duplicate</button>
           <button class="btn btn-sm btn-danger" onclick="deletePaper('${p.id}')">Delete</button>

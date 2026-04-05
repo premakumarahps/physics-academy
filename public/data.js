@@ -105,12 +105,12 @@ const DB = {
             const entities = ['students', 'papers', 'assignments', 'results', 'config', 'feedback', 'materials', 'materialAssignments'];
             for (const entity of entities) {
                 try {
-                    const res = await fetch(`${API_BASE}/data/${entity}${cacheBust}`);
+                    const res = await fetch(`${API_BASE}/data/${entity}${cacheBust}`, { headers: this._getAuthHeaders() });
                     const data = await res.json();
                     if (entity === 'config' && !Array.isArray(data)) {
                         this._state.config = data;
                     } else {
-                        this._state[entity] = data || [];
+                        this._state[entity] = Array.isArray(data) ? data : [];
                     }
                 } catch (e) {
                     console.error('Failed to load ' + entity, e);
