@@ -721,10 +721,11 @@
         ctx.stroke();
       }
 
-      requestAnimationFrame(draw);
+      window._physicsAnimId = requestAnimationFrame(draw);
     }
     
     // Start animation loop
+    if (window._physicsAnimId) cancelAnimationFrame(window._physicsAnimId);
     draw();
   }
 
