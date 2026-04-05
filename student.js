@@ -2,13 +2,7 @@
    student.js — Student Dashboard Logic
    ═══════════════════════════════════════════ */
 
-// Helper: Escape HTML to prevent XSS
-function escapeHTML(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+// escapeHTML() is defined in shared.js (loaded before this file)
 
 document.addEventListener('DOMContentLoaded', async () => {
   await DB.seed();

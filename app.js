@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
    app.js — Paper Taking Logic
-   Loads paper from localStorage by URL param
+   Loads paper data via server API by URL param
    ═══════════════════════════════════════════ */
 
 // ─── State ───
@@ -159,7 +159,15 @@ function startPaper() {
     appHeader.style.display = 'block';
     appMain.style.display = 'block';
     renderQuestions();
-    startTimer();
+    // Only start timer for activity types that support it
+    const aType = paperData.activityType || 'paper';
+    const timerEnabled = paperData.isTimerEnabled !== false && ['paper', 'quiz'].includes(aType);
+    if (timerEnabled) {
+      startTimer();
+    } else {
+      // Hide timer badge for non-timed activities
+      timerBadge.style.display = 'none';
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, 400);
 }
@@ -618,7 +626,9 @@ function resetDownloadBtn(btn, text) {
 // ═══════════════════════════════════════
 function backToDashboard() {
   // Add a small delay to ensure any pending operations complete, then navigate
+  const session = Auth.getSession();
+  const target = (session && session.role === 'admin') ? 'admin.html' : 'student.html';
   setTimeout(() => {
-    window.location.href = 'student.html';
+    window.location.href = target;
   }, 500);
 }

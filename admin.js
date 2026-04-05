@@ -521,7 +521,14 @@ function updateQuestionProp(qId, prop, value) {
     renderEditablePreview();
 }
 
+let _editorAbortController = null;
+
 function attachEditorDraggables() {
+    // Clean up previous document-level listeners to prevent leaks
+    if (_editorAbortController) _editorAbortController.abort();
+    _editorAbortController = new AbortController();
+    const signal = _editorAbortController.signal;
+
     const draggables = document.querySelectorAll('.question-diagram.draggable');
     draggables.forEach(el => {
         const qId = el.dataset.qid;
@@ -553,8 +560,8 @@ function attachEditorDraggables() {
                     uploadedQuestionData.images[idx].width = el.style.width;
                 }
             };
-            document.addEventListener('mousemove', resizeMove);
-            document.addEventListener('mouseup', resizeUp);
+            document.addEventListener('mousemove', resizeMove, { signal });
+            document.addEventListener('mouseup', resizeUp, { signal });
         }
 
         // ─── Drag to reposition ───
@@ -606,8 +613,8 @@ function attachEditorDraggables() {
             }
         };
 
-        document.addEventListener('mousemove', dragMove);
-        document.addEventListener('mouseup', dragUp);
+        document.addEventListener('mousemove', dragMove, { signal });
+        document.addEventListener('mouseup', dragUp, { signal });
     });
 }
 

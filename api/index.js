@@ -175,13 +175,42 @@ app.post('/api/data/:entity', authMiddleware, async (req, res) => {
         const table = entity === 'config' ? 'site_config' : 
                      (entity === 'materialAssignments' || entity === 'assignments') ? 'material_assignments' : entity;
 
-        // Upsert the entire array or single object
-        const items = Array.isArray(req.body) ? req.body : [req.body];
-        
-        // Note: Supabase upsert works best with a single call. 
-        // For larger arrays, it's fine.
-        const { error } = await supabase.from(table).upsert(items);
-        if (error) throw error;
+        let items = Array.isArray(req.body) ? req.body : [req.body];
+
+        // Hash plaintext student passwords before saving to DB
+        if (entity === 'students') {
+            items = items.map(s => {
+                if (s.password && !s.password.startsWith('$2')) {
+                    return { ...s, password: bcrypt.hashSync(s.password, 10) };
+                }
+                return s;
+            });
+        }
+
+        // Sync deletions: remove rows from DB that are no longer in the submitted array.
+        // This ensures that client-side deletions (deleteStudent, deletePaper, etc.) persist
+        // in Supabase. Skip for 'assignments'/'materialAssignments' as they share a table,
+        // and skip for 'config' which is a single-row entity.
+        const skipDeleteSync = ['config', 'assignments', 'materialAssignments'];
+        if (Array.isArray(req.body) && !skipDeleteSync.includes(entity)) {
+            const submittedIds = items.map(i => i.id).filter(Boolean);
+            if (submittedIds.length > 0) {
+                // Fetch existing IDs and delete any that aren't in the submitted array
+                const { data: existing } = await supabase.from(table).select('id');
+                const toDelete = (existing || []).map(r => r.id).filter(id => !submittedIds.includes(id));
+                if (toDelete.length > 0) {
+                    await supabase.from(table).delete().in('id', toDelete);
+                }
+            } else {
+                // Empty array submitted = clear all rows in this table
+                await supabase.from(table).delete().neq('id', '');
+            }
+        }
+
+        if (items.length > 0) {
+            const { error } = await supabase.from(table).upsert(items);
+            if (error) throw error;
+        }
 
         res.json({ success: true });
     } catch (e) {
@@ -304,6 +333,101 @@ app.post('/api/auth/logout', (req, res) => {
     res.json({ success: true });
 });
 
+// Guest Self-Registration
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { username, password, whatsapp } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ success: false, error: 'Username and password are required' });
+        }
+        if (username.length < 3) {
+            return res.status(400).json({ success: false, error: 'Username must be at least 3 characters' });
+        }
+        if (password.length < 4) {
+            return res.status(400).json({ success: false, error: 'Password must be at least 4 characters' });
+        }
+
+        // Check if username already exists
+        const { data: existing } = await supabase.from('students').select('id').eq('username', username).maybeSingle();
+        if (existing) {
+            return res.status(409).json({ success: false, error: 'Username already taken' });
+        }
+
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+        const newStudent = {
+            id,
+            name: username,
+            username,
+            password: hashedPassword,
+            raw_password: password,
+            type: 'guest',
+            whatsapp: whatsapp || '',
+            created_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase.from('students').insert(newStudent);
+        if (error) throw error;
+
+        // Auto-login after registration
+        const payload = {
+            role: 'student',
+            username,
+            studentId: id,
+            name: username,
+            studentType: 'guest'
+        };
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: SESSION_TIMEOUT });
+
+        res.json({
+            success: true,
+            role: 'student',
+            username,
+            studentId: id,
+            name: username,
+            studentType: 'guest',
+            token
+        });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Change Admin Password
+app.post('/api/auth/change-password', authMiddleware, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, error: 'Admin access required' });
+        }
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, error: 'Current and new passwords are required' });
+        }
+        if (newPassword.length < 4) {
+            return res.status(400).json({ success: false, error: 'New password must be at least 4 characters' });
+        }
+
+        // Find admin user
+        const { data: admin, error: fetchErr } = await supabase
+            .from('students').select('*').eq('type', 'admin').maybeSingle();
+        if (fetchErr || !admin) {
+            return res.status(404).json({ success: false, error: 'Admin account not found' });
+        }
+        if (!bcrypt.compareSync(currentPassword, admin.password)) {
+            return res.status(401).json({ success: false, error: 'Current password is incorrect' });
+        }
+
+        const hashedNew = bcrypt.hashSync(newPassword, 10);
+        const { error } = await supabase.from('students').update({ password: hashedNew }).eq('id', admin.id);
+        if (error) throw error;
+
+        res.json({ success: true, message: 'Password changed successfully' });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 // Material Uploads
 app.post('/api/materials/upload', authMiddleware, adminOnly, upload.single('file'), async (req, res) => {
     try {
@@ -330,6 +454,33 @@ app.post('/api/materials/upload', authMiddleware, adminOnly, upload.single('file
         if (error) throw error;
 
         res.json({ success: true, material });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Delete Material
+app.delete('/api/materials/:id', authMiddleware, adminOnly, async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        // Get material to find file name for storage cleanup
+        const { data: mat } = await supabase.from('materials').select('*').eq('id', id).maybeSingle();
+        if (!mat) return res.status(404).json({ error: 'Material not found' });
+
+        // Delete file from Supabase Storage
+        if (mat.file_name) {
+            await supabase.storage.from('material-bank').remove([mat.file_name]);
+        }
+
+        // Delete from DB
+        const { error } = await supabase.from('materials').delete().eq('id', id);
+        if (error) throw error;
+
+        // Also remove related material assignments
+        await supabase.from('material_assignments').delete().eq('material_id', id);
+
+        res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
