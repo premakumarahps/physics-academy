@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Paper Renderer</title>
+
+<!-- Fonts for Sinhala & Tamil support -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Noto+Sans+Sinhala:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: #d0d0d0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 10px;
+    font-family: 'Noto Sans', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+}
+
+/* ============================================================
+   TOOLBAR (screen only)
+   ============================================================ */
+.toolbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: #1a1a2e;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 24px;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.toolbar button {
+    background: #e94560;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+}
+.toolbar button:hover { background: #c73550; }
+.toolbar span { font-size: 14px; opacity: 0.7; }
+
+/* ============================================================
+   A4 PAGE
+   ============================================================ */
+.a4-page {
+    width: 210mm;
+    height: 297mm;
+    background: #fff;
+    margin-top: 60px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
+/* --- Paper Reference Code (outside border, flush above top edge) --- */
+.paper-ref {
+    position: absolute;
+    top: 9.5mm;
+    left: 10mm;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* --- Outer thick border --- */
+.page-border {
+    position: absolute;
+    top: 14mm;
+    left: 10mm;
+    right: 10mm;
+    bottom: 10mm;
+    border: 1.5px solid #000;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================================
+   SECTIONS — compact layout matching real AL paper
+   ============================================================ */
+
+/* --- Copyright Bar (plain text, no box) --- */
+.copyright-bar {
+    padding: 3px 8px;
+    font-size: 8.5px;
+    font-style: italic;
+    line-height: 1.4;
+    color: #000;
+}
+
+/* --- Combined Dept + Exam Title (ONE bordered box) --- */
+.dept-exam-wrap {
+    padding: 4px 8px;
+}
+
+.dept-exam-box {
+    position: relative;
+    border: 1px solid #000;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.dept-watermark {
+    position: absolute;
+    inset: 0;
+    color: rgba(0, 0, 0, 0.22);
+    font-size: 7.5px;
+    font-weight: 700;
+    line-height: 1.5;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    padding: 2px 0;
+    white-space: nowrap;
+}
+
+.dept-text {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 5px 10px 1px;
+    overflow: hidden;
+}
+.dept-text .si { font-size: 12.5px; font-weight: 700; line-height: 1.6; }
+.dept-text .ta { font-size: 12.5px; font-weight: 700; line-height: 1.6; }
+.dept-text .en { font-size: 11px; font-weight: 700; line-height: 1.6; }
+
+.exam-title {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 1px 10px 5px;
+}
+.exam-title .si { font-size: 12.5px; font-weight: 700; line-height: 1.7; }
+.exam-title .ta { font-size: 12.5px; font-weight: 700; line-height: 1.7; }
+.exam-title .en { font-size: 11.5px; font-weight: 700; line-height: 1.7; }
+
+/* --- Middle Row: Subject | Codes | Duration --- */
+.middle-row-wrap {
+    padding: 4px 8px;
+}
+
+.middle-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+}
+
+.subject-box,
+.duration-box {
+    border: 1px solid #000;
+    border-radius: 6px;
+    padding: 5px 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.subject-box .line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.duration-box .line {
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
+.codes-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.code-box {
+    width: 34px;
+    height: 40px;
+    border: 3.5px double #000;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+/* --- Instructions Box --- */
+.instructions-box-wrap {
+    padding: 0 8px;
+}
+
+.instructions-box {
+    border: 1px solid #000;
+    border-radius: 6px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.instructions-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.instructions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.instructions-list li {
+    font-size: 11px;
+    line-height: 1.65;
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.instructions-list li::before {
+    content: "❖";
+    position: absolute;
+    left: 2px;
+    top: 0;
+    font-size: 9px;
+}
+
+.instructions-list li b {
+    font-weight: 700;
+}
+
+.instructions-footer {
+    text-align: center;
+    padding-top: 14px;
+}
+
+.instructions-footer .no-calc {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.instructions-footer .constant {
+    font-size: 13px;
+    font-style: italic;
+}
+
+.instructions-footer .constant sup {
+    font-size: 9px;
+}
+
+/* --- Page Number (centered below the bottom border) --- */
+.page-number {
+    position: absolute;
+    bottom: 3mm;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   PRINT / PDF STYLES
+   ============================================================ */
+@media print {
+    body {
+        background: #fff;
+        padding: 0;
+        margin: 0;
+    }
+    .toolbar { display: none !important; }
+    .a4-page {
+        width: 210mm;
+        height: 297mm;
+        margin: 0;
+        box-shadow: none;
+        page-break-after: always;
+    }
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- Toolbar (screen only) -->
+<div class="toolbar">
+    <button onclick="window.print()">📄 Export PDF</button>
+    <span>Exam Paper Template Renderer — Preview Mode</span>
+</div>
+
+<!-- A4 Page -->
+<div class="a4-page" id="examPage">
+    <div class="page-border" id="pageBorder">
+        <!-- Content injected by JS -->
+    </div>
+</div>
+
+<script>
+/* =============================================================
+   JSON TEMPLATE SCHEMA
+   =============================================================
+   This is the template data object. Change these values to
+   generate different exam papers from the same renderer.
+   ============================================================= */
+
+const examTemplate = {
+    paperRef: "AL/2024/01/S-I",
+
+    copyright: {
+        si: "සියලුම හිමිකම් ඇවිරිණි",
+        ta: "முழுப் பதிப்புரிமையுடையது",
+        en: "All Rights Reserved"
+    },
+
+    department: {
+        si: "ශ්‍රී ලංකා විභාග දෙපාර්තමේන්තුව",
+        ta: "இலங்கைப் பரீட்சைத் திணைக்களம்",
+        en: "Department of Examinations, Sri Lanka"
+    },
+
+    exam: {
+        si: "අධ්‍යයන පොදු සහතික පත්‍ර (උසස් පෙළ) විභාගය",
+        ta: "கல்விப் பொதுத் தராதரப் பத்திர (உயர் தர)ப் பரீட்சை",
+        en: "General Certificate of Education (Adv. Level) Examination",
+        year: 2024
+    },
+
+    subject: {
+        si: "භෞතික විද්‍යාව",
+        ta: "பௌதிகவியல்",
+        en: "Physics",
+        paper: "I"
+    },
+
+    codes: ["01", "S", "I"],
+
+    duration: {
+        si: "පැය දෙකයි",
+        ta: "இரண்டு மணித்தியாலம்",
+        en: "Two hours"
+    },
+
+    instructions: {
+        label: "උපදෙස් :",
+        items: [
+            "මෙම ප්‍රශ්න පත්‍රයේ ප්‍රශ්න <b>50</b>ක්, පිටු <b>10</b>ක අඩංගු වේ.",
+            "සියලුම ප්‍රශ්නවලට පිළිතුරු සපයන්න.",
+            "පිළිතුරු පත්‍රයේ නියමිත ස්ථානයේ ඔබේ විභාග අංකය ලියන්න.",
+            "පිළිතුරු පත්‍රයේ පිටුපස දී ඇති උපදෙස් සැලකිලිමත්ව කියවන්න.",
+            "<b>1</b> සිට <b>50</b> තෙක් වූ එක් එක් ප්‍රශ්නය සඳහා දී ඇති (1), (2), (3), (4), (5) යන පිළිතුරු වලින් නිවැරදි හෝ ඉතාමත් ගැළපෙන හෝ පිළිතුරු තෝරා ගෙන, එය, පිළිතුරු පත්‍රයේ පිටුපස දැක්වෙන උපදෙස් පරිදි කතිරයකින් (X) ලකුණු කරන්න."
+        ]
+    },
+
+    footer: {
+        notice: "ගණක යන්ත්‍ර භාවිතයට ඉඩ දෙනු නොලැබේ.",
+        constants: [
+            { label: "g", value: "10", unit: "m s", power: "−2" }
+        ]
+    },
+
+    pageNumber: 1
+};
+
+
+/* =============================================================
+   RENDERER — Takes template JSON → DOM
+   ============================================================= */
+
+function renderExamPaper(template, pageEl, borderEl) {
+    borderEl.innerHTML = "";
+
+    // 0) Paper reference — outside the border, on the page
+    if (template.paperRef) {
+        const ref = el("div", "paper-ref");
+        ref.textContent = template.paperRef;
+        pageEl.appendChild(ref);
+    }
+
+    // 1) Copyright bar
+    const copyrightBar = el("div", "copyright-bar");
+    copyrightBar.textContent =
+        `${template.copyright.si} / ${template.copyright.ta} / ${template.copyright.en}`;
+    borderEl.appendChild(copyrightBar);
+
+    // 2) Combined Department + Exam Title box
+    const deptExamWrap = el("div", "dept-exam-wrap");
+    const deptExamBox = el("div", "dept-exam-box");
+
+    // Watermark — fill only the department name area
+    const wmLines = [];
+    const siWm = template.department.si;
+    const taWm = template.department.ta;
+    const enWm = template.department.en;
+    for (let i = 0; i < 12; i++) {
+        wmLines.push(Array(15).fill(siWm).join(" "));
+        wmLines.push(Array(12).fill(taWm).join(" "));
+        wmLines.push(Array(12).fill(enWm).join(" "));
+    }
+    const watermark = el("div", "dept-watermark");
+    watermark.innerHTML = wmLines.map(l => `<div>${l}</div>`).join("");
+
+    // Department text (watermark lives inside here)
+    const deptText = el("div", "dept-text");
+    deptText.appendChild(watermark);
+    const deptTextContent = el("div", "");
+    deptTextContent.style.position = "relative";
+    deptTextContent.style.zIndex = "1";
+    deptTextContent.innerHTML =
+        `<div class="si">${template.department.si}</div>` +
+        `<div class="ta">${template.department.ta}</div>` +
+        `<div class="en">${template.department.en}</div>`;
+    deptText.appendChild(deptTextContent);
+    deptExamBox.appendChild(deptText);
+
+    // Exam title (inside same box)
+    const examTitle = el("div", "exam-title");
+    examTitle.innerHTML =
+        `<div class="si">${template.exam.si}, ${template.exam.year}</div>` +
+        `<div class="ta">${template.exam.ta}, ${template.exam.year}</div>` +
+        `<div class="en">${template.exam.en}, ${template.exam.year}</div>`;
+    deptExamBox.appendChild(examTitle);
+
+    deptExamWrap.appendChild(deptExamBox);
+    borderEl.appendChild(deptExamWrap);
+
+    // 3) Middle row: Subject | Codes | Duration
+    const middleRowWrap = el("div", "middle-row-wrap");
+    const middleRow = el("div", "middle-row");
+
+    const subjectBox = el("div", "subject-box");
+    subjectBox.innerHTML =
+        `<div class="line"><span>${template.subject.si}</span><span>${template.subject.paper}</span></div>` +
+        `<div class="line"><span>${template.subject.ta}</span><span>${template.subject.paper}</span></div>` +
+        `<div class="line"><span>${template.subject.en}</span><span>${template.subject.paper}</span></div>`;
+    middleRow.appendChild(subjectBox);
+
+    const codesArea = el("div", "codes-area");
+    template.codes.forEach(code => {
+        const box = el("div", "code-box");
+        box.textContent = code;
+        codesArea.appendChild(box);
+    });
+    middleRow.appendChild(codesArea);
+
+    const durationBox = el("div", "duration-box");
+    durationBox.innerHTML =
+        `<div class="line">${template.duration.si}</div>` +
+        `<div class="line">${template.duration.ta}</div>` +
+        `<div class="line">${template.duration.en}</div>`;
+    middleRow.appendChild(durationBox);
+
+    middleRowWrap.appendChild(middleRow);
+    borderEl.appendChild(middleRowWrap);
+
+    // 4) Instructions box (label inside)
+    const instrBoxWrap = el("div", "instructions-box-wrap");
+    const instrBox = el("div", "instructions-box");
+
+    const instrLabel = el("div", "instructions-label");
+    instrLabel.textContent = template.instructions.label;
+    instrBox.appendChild(instrLabel);
+
+    const ul = el("ul", "instructions-list");
+    template.instructions.items.forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = item;
+        ul.appendChild(li);
+    });
+    instrBox.appendChild(ul);
+
+    const footer = el("div", "instructions-footer");
+    const noCalc = el("div", "no-calc");
+    noCalc.textContent = template.footer.notice;
+    footer.appendChild(noCalc);
+
+    template.footer.constants.forEach(c => {
+        const constDiv = el("div", "constant");
+        constDiv.innerHTML = `(${c.label} = ${c.value} ${c.unit}<sup>${c.power}</sup>)`;
+        footer.appendChild(constDiv);
+    });
+
+    instrBox.appendChild(footer);
+    instrBoxWrap.appendChild(instrBox);
+    borderEl.appendChild(instrBoxWrap);
+
+    // 5) Page number — centered below the bottom border
+    if (template.pageNumber !== undefined) {
+        const pgNum = el("div", "page-number");
+        pgNum.textContent = `-${template.pageNumber}-`;
+        pageEl.appendChild(pgNum);
+    }
+}
+
+
+/* =============================================================
+   HELPERS
+   ============================================================= */
+
+function el(tag, className) {
+    const e = document.createElement(tag);
+    if (className) e.className = className;
+    return e;
+}
+
+
+/* =============================================================
+   INIT
+   ============================================================= */
+renderExamPaper(examTemplate, document.getElementById("examPage"), document.getElementById("pageBorder"));
+</script>
+</body>
+</html>
